@@ -1,0 +1,171 @@
+html {
+    font-size: 62.5%;
+}
+
+body {
+    font-size: 1.6rem;
+    font-family: "Yu Gothic Medium", "Hiragino Kaku Gothic Pro", sans-serif;
+    color: #212121;
+    background: #fefefe;
+}
+
+body,
+button,
+input,
+optgroup,
+select,
+textarea {
+    line-height: 1.5;
+}
+
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+ol,
+ul,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+    display: flex;
+    flex-flow: column nowrap;
+    height: 100vh;
+}
+
+html,
+body,
+#app {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+body,
+#app {
+    flex: 1;
+}
+
+body {
+    /* ページの中央に表示する。 */
+    align-self: center;
+    width: 320px;
+}
+
+@media (min-width: 480px) {
+    body {
+        width: 480px;
+    }
+}
+
+#app {
+    padding: 16px;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+}
+
+/*
+    リストのスタイル
+*/
+
+ul,
+li {
+    padding: 0;
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+}
+
+/*
+    ツール類のスタイル
+*/
+
+button {
+    min-width: 32px;
+}
+
+input[type="text"],
+button {
+    padding: 2px 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+input[type="text"]:hover,
+button:hover {
+    border: 1px solid #8cc;
+}
+
+input[type="text"]:focus,
+button:focus {
+    padding: 1px 3px;
+    border-width: 2px;
+}
+
+.danger-button,
+.danger-button:hover {
+    border-color: #f44;
+    background: #c22;
+    color: #eee;
+}
+
+/*
+    エディタ
+*/
+
+.editor {
+    display: flex;
+    flex-flow: column nowrap;
+
+    background: #dee;
+    border: 1px solid #8cc;
+    border-radius: 4px;
+
+    padding: 16px 32px;
+}
+
+.editor li {
+    margin-top: 4px;
+
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.editor .entry-text-input {
+    flex: 1;
+}
+
+.editor .down-button,
+.editor .entry-text-input,
+.editor .remove-button {
+    margin-left: 4px;
+}
+
+.editor-toggle-label {
+    align-self: flex-end;
+
+    display: block;
+
+    margin-top: 8px;
+
+    background: #dee;
+    border: 1px solid #8cc;
+    border-radius: 4px;
+
+    padding: 4px 8px;
+}
+
+.editor-toggle-checkbox {
+    display: none;
+}
