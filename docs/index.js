@@ -1,5 +1,7 @@
 import { app, h } from "https://unpkg.com/hyperapp@2.0.3"
 
+const TITLE = "Make Your Checklist [beta]"
+
 const stringIsBlank = s =>
   s.trim() === ""
 
@@ -39,7 +41,7 @@ const stateHasDraftEntry = state => {
 }
 
 const stateEnsureDraftEntry = state =>
-  !stateHasDraftEntry(state)
+  state.editing && !stateHasDraftEntry(state)
     ? ({ ...state, entries: [...state.entries, entryEmpty] })
     : state
 
@@ -62,30 +64,37 @@ const stateSwapEntries = (state, first, second) => {
 // Update
 // -----------------------------------------------
 
-const editingDidChange = (state, ev) => {
-  const editing = ev.target.checked
-  return editing
-    ? stateEnsureDraftEntry({ ...state, editing: true })
-    : stateFinishEditing(state)
+const stateDidChange = state => {
+  state = stateEnsureDraftEntry(state)
+
+  // FIXME: What is the correct hyperapp-way?
+  storeState(state)
+
+  return state
 }
 
-const entriesDidChange = state =>
-  stateEnsureDraftEntry(state)
+const editingDidChange = (state, ev) => {
+  const editing = ev.target.checked
+  state = editing
+    ? ({ ...state, editing: true })
+    : stateFinishEditing(state)
+  return stateDidChange(state)
+}
 
 const entryRemoveButtonDidClick = index => state =>
-  entriesDidChange({
+  stateDidChange({
     ...state,
     entries: state.entries.filter((_, i) => i !== index),
   })
 
 const entryUpButtonDidClick = index => state =>
-  entriesDidChange(stateSwapEntries(state, index - 1, index))
+  stateDidChange(stateSwapEntries(state, index - 1, index))
 
 const entryDownButtonDidClick = index => state =>
-  entriesDidChange(stateSwapEntries(state, index, index + 1))
+  stateDidChange(stateSwapEntries(state, index, index + 1))
 
 const entryTextDidInput = index => (state, ev) =>
-  entriesDidChange({
+  stateDidChange({
     ...state,
     entries: state.entries.map((entry, i) => (
       i !== index ? entry : ({
@@ -95,7 +104,7 @@ const entryTextDidInput = index => (state, ev) =>
   })
 
 const entryCheckDidChange = index => (state, ev) =>
-  ({
+  stateDidChange({
     ...state,
     entries: state.entries.map((entry, i) => (
       i !== index ? entry : ({
@@ -180,12 +189,49 @@ const renderApp = state => (
 )
 
 // -----------------------------------------------
+// Persistent
+// -----------------------------------------------
+
+const HISTORY_STATE = null
+
+const base64Encode = data => window.btoa(data)
+
+const base64Decode = encodedString => window.atob(encodedString)
+
+const serialize = state => base64Encode(JSON.stringify(state))
+
+const deserialize = serializedState => {
+  if (!serializedState) {
+    return null
+  }
+
+  try {
+    return JSON.parse(base64Decode(serializedState))
+  } catch {
+    return null
+  }
+}
+
+const storeState = state => {
+  const hash = "#" + serialize(state)
+  window.history.replaceState(HISTORY_STATE, TITLE, hash)
+}
+
+const restoreState = () => {
+  const hash = document.location.hash.replace(/^#/, "")
+  const state = deserialize(hash)
+  return state || stateEmpty
+}
+
+// -----------------------------------------------
 // Infra
 // -----------------------------------------------
 
 const main = () => {
+  const initialState = restoreState()
+
   app({
-    init: stateEmpty,
+    init: initialState,
     view: renderApp,
     node: document.getElementById("app")
   })
