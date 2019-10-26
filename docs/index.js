@@ -19,7 +19,6 @@ const entryEmpty = {
 
 const stateEmpty = {
   editing: true,
-  draftText: "",
   entries: [],
 }
 
