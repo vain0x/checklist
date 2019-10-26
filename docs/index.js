@@ -18,7 +18,7 @@ const entryEmpty = {
 }
 
 const stateEmpty = {
-  editing: true,
+  editing: false,
   entries: [],
 }
 
@@ -34,6 +34,19 @@ const stateFinishEditing = state =>
         }))
   }
 
+const stateAddEntry = (state, text) =>
+  ({ ...state, entries: [...state.entries, { ...entryEmpty, text }] })
+
+const stateCheckEntry = (state, index, checked) =>
+  ({
+    ...state,
+    entries: state.entries.map((entry, i) => (
+      i !== index ? entry : ({
+      ...entry,
+      checked,
+    }))),
+  })
+
 const stateHasDraftEntry = state => {
   const last = arrayLast(state.entries)
   return last && stringIsBlank(last.text)
@@ -41,7 +54,7 @@ const stateHasDraftEntry = state => {
 
 const stateEnsureDraftEntry = state =>
   state.editing && !stateHasDraftEntry(state)
-    ? ({ ...state, entries: [...state.entries, entryEmpty] })
+    ? stateAddEntry(state, "")
     : state
 
 const stateSwapEntries = (state, first, second) => {
@@ -57,6 +70,64 @@ const stateSwapEntries = (state, first, second) => {
         entry,
     )
   }
+}
+
+const stateFromEventList = events => {
+  let state = ({ ...stateEmpty, editing: true })
+
+  for (const event of events) {
+    const type = event[0]
+
+    switch (type) {
+      case "END_EDIT": {
+        state = stateFinishEditing(state)
+        continue
+      }
+      case "ADD_ENTRY": {
+        const [, text] = event
+        if (typeof text !== "string") {
+          continue
+        }
+        state = stateAddEntry(state, text)
+        continue
+      }
+      case "CHECK_ENTRY": {
+        const [, index] = event
+        if (!Number.isSafeInteger(index)) {
+          continue
+        }
+        state = stateCheckEntry(state, index, true)
+        continue
+      }
+      default:
+        console.error("WARN: Unknown event", event)
+        continue
+    }
+  }
+
+  return stateEnsureDraftEntry(state)
+}
+
+// Convert the state to a list of events that can rebuild the state later.
+// For compatibility, the event list is serialized rather than the state.
+const stateToEventList = state => {
+  const events = []
+
+  for (let i = 0; i < state.entries.length; i++) {
+    const { text, checked } = state.entries[i]
+
+    events.push(["ADD_ENTRY", String(text)])
+
+    if (checked) {
+      events.push(["CHECK_ENTRY", i])
+    }
+  }
+
+  if (!state.editing) {
+    events.push(["END_EDIT"])
+  }
+
+  return events
 }
 
 // -----------------------------------------------
@@ -103,14 +174,7 @@ const entryTextDidInput = index => (state, ev) =>
   })
 
 const entryCheckDidChange = index => (state, ev) =>
-  stateDidChange({
-    ...state,
-    entries: state.entries.map((entry, i) => (
-      i !== index ? entry : ({
-      ...entry,
-      checked: ev.target.checked,
-    }))),
-  })
+  stateDidChange(stateCheckEntry(state, index, ev.target.checked))
 
 // -----------------------------------------------
 // View
@@ -197,15 +261,15 @@ const base64Encode = data => window.btoa(data)
 
 const base64Decode = encodedString => window.atob(encodedString)
 
-const serialize = state => base64Encode(JSON.stringify(state))
+const serialize = state => base64Encode(JSON.stringify(stateToEventList(state)))
 
-const deserialize = serializedState => {
-  if (!serializedState) {
+const deserialize = serial => {
+  if (!serial) {
     return null
   }
 
   try {
-    return JSON.parse(base64Decode(serializedState))
+    return stateFromEventList(JSON.parse(base64Decode(serial)))
   } catch {
     return null
   }
