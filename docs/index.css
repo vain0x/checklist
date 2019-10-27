@@ -2,11 +2,10 @@ html {
     font-size: 62.5%;
 }
 
-body {
+body,
+input[type="text"] {
     font-size: 1.6rem;
     font-family: "Yu Gothic Medium", "Hiragino Kaku Gothic Pro", sans-serif;
-    color: #212121;
-    background: #fefefe;
 }
 
 body,
@@ -52,25 +51,41 @@ body,
     flex: 1;
 }
 
-body {
+#app {
     /* ページの中央に表示する。 */
     align-self: center;
     width: 320px;
+
+    margin: 16px 0;
+    padding: 16px;
+    border-radius: 8px;
 }
 
 @media (min-width: 480px) {
-    body {
+    #app {
         width: 480px;
     }
 }
 
-#app {
-    padding: 16px;
-}
-
 footer {
+    font-size: 1.2rem;
+
     display: flex;
     justify-content: center;
+}
+
+/*
+    ページ全体の色
+*/
+
+body {
+    background-color: #eee;
+    color: #212121;
+}
+
+#app {
+    background-color: white;
+    border: 1px solid #ccc;
 }
 
 /*
@@ -102,70 +117,104 @@ button {
     border-radius: 4px;
 }
 
-input[type="text"]:hover,
-button:hover {
-    border: 1px solid #8cc;
-}
-
 input[type="text"]:focus,
 button:focus {
+    border: 1px solid #8cc;
     padding: 1px 3px;
     border-width: 2px;
 }
 
 .danger-button,
 .danger-button:hover {
-    border-color: #f44;
-    background: #c22;
-    color: #eee;
+    color: #f44;
 }
 
 /*
-    エディタ
+    チェックリスト
 */
 
-.editor {
+.checklist {
     display: flex;
     flex-flow: column nowrap;
+}
 
-    background: #dee;
-    border: 1px solid #8cc;
+.checklist .entry {
+    margin: 8px 0;
+    padding: 4px 8px;
+
+    background: #f8f8f8;
+    border: 1px solid #ccc;
     border-radius: 4px;
 
-    padding: 16px 32px;
-}
-
-.editor li {
-    margin-top: 4px;
-
     display: flex;
-    flex-flow: row nowrap;
 }
 
-.editor .entry-text-input {
+.checklist .entry[data-checked="true"] {
+    background: #efe;
+    border-color: #8c8;
+}
+
+/*
+    チェックマーク
+*/
+
+.checklist .entry-checkmark {
+    /* 左右のマージンのバランスをとる */
+    margin-left: 5px;
+
+    font-weight: 700;
+    color: #ccc;
+}
+
+.checklist .entry[data-checked="true"] .entry-checkmark {
+    color: green;
+}
+
+/*
+    テキスト
+*/
+
+.checklist .entry-text {
+    /* input と同じだけのパディングを持たせる */
+    padding: 3px 5px;
+}
+
+.checklist .entry-text,
+.checklist .entry-text-input {
+    margin-left: 8px;
+}
+
+.checklist .entry-text,
+.checklist[data-editing="false"] .entry-text-label,
+.checklist[data-editing="true"] .entry-text-input {
     flex: 1;
 }
 
-.editor .down-button,
-.editor .entry-text-input,
-.editor .remove-button {
+.checklist .entry-text-label {
+    display: flex;
+    align-items: center;
+}
+
+.checklist .entry-text-input {
+    font-size: 1.6rem;
+}
+
+/*
+    操作ボタン
+*/
+
+.checklist .down-button {
     margin-left: 4px;
 }
 
-.editor-toggle-label {
-    align-self: flex-end;
-
-    display: block;
-
-    margin-top: 8px;
-
-    background: #dee;
-    border: 1px solid #8cc;
-    border-radius: 4px;
-
-    padding: 4px 8px;
+.checklist .up-button,
+.checklist .remove-button {
+    margin-left: 16px;
 }
 
-.editor-toggle-checkbox {
-    display: none;
+.edit-button {
+    align-self: flex-end;
+
+    margin-top: 8px;
+    width: 80px;
 }

@@ -42,9 +42,9 @@ const stateCheckEntry = (state, index, checked) =>
     ...state,
     entries: state.entries.map((entry, i) => (
       i !== index ? entry : ({
-      ...entry,
-      checked,
-    }))),
+        ...entry,
+        checked,
+      }))),
   })
 
 const stateHasDraftEntry = state => {
@@ -66,8 +66,8 @@ const stateSwapEntries = (state, first, second) => {
     ...state,
     entries: state.entries.map((entry, i) =>
       i === first ? state.entries[second] :
-      i === second ? state.entries[first] :
-        entry,
+        i === second ? state.entries[first] :
+          entry,
     )
   }
 }
@@ -143,8 +143,8 @@ const stateDidChange = state => {
   return state
 }
 
-const editingDidChange = (state, ev) => {
-  const editing = ev.target.checked
+const editButtonDidClick = state => {
+  const editing = !state.editing
   state = editing
     ? ({ ...state, editing: true })
     : stateFinishEditing(state)
@@ -168,9 +168,9 @@ const entryTextDidInput = index => (state, ev) =>
     ...state,
     entries: state.entries.map((entry, i) => (
       i !== index ? entry : ({
-      ...entry,
-      text: ev.target.value,
-    }))),
+        ...entry,
+        text: ev.target.value,
+      }))),
   })
 
 const entryCheckDidChange = index => (state, ev) =>
@@ -180,74 +180,67 @@ const entryCheckDidChange = index => (state, ev) =>
 // View
 // -----------------------------------------------
 
-const renderEdit = state => (
-  h("article", {
-    class: "editor",
-  }, [
-    h("ul", {}, (
-      state.entries.map(({ text }, i) => (
-        h("li", {}, [
-          h("button", {
-            class: "up-button default-button",
-            onClick: entryUpButtonDidClick(i),
-          }, "▲"),
-          h("button", {
-            class: "down-button default-button",
-            onClick: entryDownButtonDidClick(i),
-          }, "▼"),
-
-          h("input", {
-            type: "text",
-            class: "entry-text-input",
-            onInput: entryTextDidInput(i),
-            value: text,
-          }),
-
-          h("button", {
-            type: "button",
-            class: "remove-button danger-button",
-            onClick: entryRemoveButtonDidClick(i),
-          }, "✖"),
-        ])))
-    )),
-  ])
-)
-
-const renderChecklist = state => (
-  h("article", {
-    class: "checklist",
-  }, [
-    h("ul", {}, (
-      state.entries.map(({ text, checked }, i) => (
-        h("li", {}, (
-          h("label", {}, [
-            h("input", {
-              type: "checkbox",
-              checked,
-              onChange: entryCheckDidChange(i),
-            }),
-            text,
-          ])
-        ))))
-    )),
-  ])
-)
-
 const renderApp = state => (
   h("main", { id: "app" }, [
-    !state.editing ? renderChecklist(state) : null,
+    h("article", {
+      class: "checklist",
+      "data-editing": String(state.editing),
+    }, [
+      h("ul", {}, (
+        state.entries.map(({ text, checked }, i) => (
+          h("li", {
+            class: "entry",
+            "data-checked": String(checked),
+          }, [
+            h("label", { class: "entry-text-label" }, [
+              h("input", {
+                type: "checkbox",
+                hidden: true,
+                checked,
+                onChange: entryCheckDidChange(i),
+              }),
 
-    state.editing ? renderEdit(state) : null,
+              h("div", { class: "entry-checkmark" }, "✔"),
 
-    h("label", { class: "editor-toggle-label" }, [
-      h("input", {
-        type: "checkbox",
-        class: "editor-toggle-checkbox",
-        onChange: editingDidChange,
-        checked: state.editing,
-      }),
-      state.editing ? "✔ OK" : "🖊 Edit",
+              !state.editing ? (
+                h("div", { class: "entry-text" }, text)
+              ) : null,
+            ]),
+
+            state.editing ? [
+              h("input", {
+                type: "text",
+                class: "entry-text-input",
+                size: 10,
+                onInput: entryTextDidInput(i),
+                value: text,
+              }),
+
+              h("button", {
+                class: "up-button default-button",
+                onClick: entryUpButtonDidClick(i),
+              }, "▲"),
+
+              h("button", {
+                class: "down-button default-button",
+                onClick: entryDownButtonDidClick(i),
+              }, "▼"),
+
+              h("button", {
+                type: "button",
+                class: "remove-button danger-button",
+                onClick: entryRemoveButtonDidClick(i),
+              }, "✖"),
+            ] : null,
+          ])))
+      )),
     ]),
+
+    h("button", {
+      type: "button",
+      class: "edit-button",
+      onClick: editButtonDidClick,
+    }, state.editing ? "✔ OK" : "🖊 Edit"),
   ])
 )
 
