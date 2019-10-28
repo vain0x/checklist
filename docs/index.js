@@ -250,11 +250,18 @@ const renderApp = state => (
 
 const HISTORY_STATE = null
 
-const base64Encode = data => window.btoa(data)
+const TEXT_ENCODER = new TextEncoder()
 
-const base64Decode = encodedString => window.atob(encodedString)
+const TEXT_DECODER = new TextDecoder()
 
-const serialize = state => base64Encode(JSON.stringify(stateToEventList(state)))
+const serialize = state =>
+  window.base64js.fromByteArray(
+    window.pako.deflateRaw(
+      TEXT_ENCODER.encode(
+        JSON.stringify(
+          stateToEventList(
+            state
+          )))))
 
 const deserialize = serial => {
   if (!serial) {
@@ -262,7 +269,15 @@ const deserialize = serial => {
   }
 
   try {
-    return stateFromEventList(JSON.parse(base64Decode(serial)))
+    const state = (
+      stateFromEventList(
+        JSON.parse(
+          TEXT_DECODER.decode(
+            window.pako.inflateRaw(
+              window.base64js.toByteArray(
+                serial
+              ))))))
+    return state
   } catch {
     return null
   }
