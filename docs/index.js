@@ -72,6 +72,10 @@ const stateSwapEntries = (state, first, second) => {
   }
 }
 
+const END_EDIT_EVENT = 1
+const ADD_ENTRIES_EVENT = 2
+const CHECK_ENTRIES_EVENT = 3
+
 const stateFromEventList = events => {
   let state = ({ ...stateEmpty, editing: true })
 
@@ -79,24 +83,28 @@ const stateFromEventList = events => {
     const type = event[0]
 
     switch (type) {
-      case "END_EDIT": {
+      case END_EDIT_EVENT: {
         state = stateFinishEditing(state)
         continue
       }
-      case "ADD_ENTRY": {
-        const [, text] = event
-        if (typeof text !== "string") {
-          continue
+      case ADD_ENTRIES_EVENT: {
+        const [, ...texts] = event
+        for (let text of texts) {
+          if (typeof text !== "string") {
+            text = ""
+          }
+          state = stateAddEntry(state, text)
         }
-        state = stateAddEntry(state, text)
         continue
       }
-      case "CHECK_ENTRY": {
-        const [, index] = event
-        if (!Number.isSafeInteger(index)) {
-          continue
+      case CHECK_ENTRIES_EVENT: {
+        const [, ...indexes] = event
+        for (const index of indexes) {
+          if (!Number.isSafeInteger(index)) {
+            continue
+          }
+          state = stateCheckEntry(state, index, true)
         }
-        state = stateCheckEntry(state, index, true)
         continue
       }
       default:
@@ -113,18 +121,24 @@ const stateFromEventList = events => {
 const stateToEventList = state => {
   const events = []
 
+  const entryTexts = []
+  const checkedIndexes = []
+
   for (let i = 0; i < state.entries.length; i++) {
     const { text, checked } = state.entries[i]
 
-    events.push(["ADD_ENTRY", String(text)])
+    entryTexts.push(String(text))
 
     if (checked) {
-      events.push(["CHECK_ENTRY", i])
+      checkedIndexes.push(i)
     }
   }
 
+  events.push([ADD_ENTRIES_EVENT, ...entryTexts])
+  events.push([CHECK_ENTRIES_EVENT, ...checkedIndexes])
+
   if (!state.editing) {
-    events.push(["END_EDIT"])
+    events.push([END_EDIT_EVENT])
   }
 
   return events
