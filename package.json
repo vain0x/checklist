@@ -1,0 +1,27 @@
+{
+  "name": "checklist",
+  "version": "1.0.0",
+  "description": "Make your checklist and share.",
+  "keywords": [],
+  "author": "vain0x <vainzerox@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vain0x/checklist.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vain0x/checklist/issues"
+  },
+  "homepage": "https://github.com/vain0x/checklist#readme",
+  "main": "docs/index.js",
+  "dependencies": {
+    "pako": "^1.0.10",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "build": "webpack --mode production",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

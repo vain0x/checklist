@@ -1,0 +1,1 @@
+window.pako = require("pako")
