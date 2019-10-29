@@ -2,6 +2,8 @@ import { app, h } from "https://unpkg.com/hyperapp@2.0.3"
 
 const TITLE = "Make Your Checklist"
 
+const KEY_ENTER = 13
+
 const stringIsBlank = s =>
   s.trim() === ""
 
@@ -145,6 +147,14 @@ const stateToEventList = state => {
 }
 
 // -----------------------------------------------
+// Effects
+// -----------------------------------------------
+
+const fx = x => y => [x, y]
+
+const domFocus = fx((_, id) => document.getElementById(id).focus())
+
+// -----------------------------------------------
 // Update
 // -----------------------------------------------
 
@@ -187,6 +197,17 @@ const entryTextDidInput = index => (state, ev) =>
       }))),
   })
 
+const entryInputId = index =>
+  `entry-text-input-${index}`
+
+const entryTextDidKeyDown = index => (state, ev) => {
+  if (ev.keyCode === KEY_ENTER) {
+    return [state, domFocus(entryInputId(index + 1))]
+  }
+
+  return state
+}
+
 const entryCheckDidChange = index => (state, ev) =>
   stateDidChange(stateCheckEntry(state, index, ev.target.checked))
 
@@ -224,9 +245,11 @@ const renderApp = state => (
             state.editing ? [
               h("input", {
                 type: "text",
+                id: entryInputId(i),
                 class: "entry-text-input",
                 size: 10,
                 onInput: entryTextDidInput(i),
+                onKeyDown: entryTextDidKeyDown(i),
                 value: text,
               }),
 
