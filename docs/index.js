@@ -1,6 +1,6 @@
 import { app, h } from "https://unpkg.com/hyperapp@2.0.3"
 
-const TITLE = "Make Your Checklist [beta]"
+const TITLE = "Make Your Checklist"
 
 const stringIsBlank = s =>
   s.trim() === ""
